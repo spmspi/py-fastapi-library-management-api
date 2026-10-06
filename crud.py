@@ -27,7 +27,7 @@ def create_author(db: Session, author: AuthorCreate):
 def get_all_books(
         db: Session,
         title: str = None,
-        author_id: str = None,
+        author_id: int = None,
         skip: int = 0,
         limit: int = 10
         ):

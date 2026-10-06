@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from typing import List
 
 from fastapi import FastAPI, HTTPException
@@ -11,6 +12,11 @@ app = FastAPI()
 
 def create_db_and_tables():
     Base.metadata.create_all(engine)
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    create_db_and_tables()
+    yield
 
 def get_session():
     with Session(engine) as session:
@@ -41,8 +47,8 @@ def create_author(author: schemas.AuthorCreate, db: Session = Depends(get_sessio
     return crud.create_author(db=db, author=author)
 
 @app.get("/books/", response_model=List[schemas.Book])
-def reed_author(db: Session = Depends(get_session)):
-    return crud.get_all_books(db=db)
+def reed_author(db: Session = Depends(get_session), author_id: int | None = None, skip: int = 0, limit: int = 10):
+    return crud.get_all_books(db=db, author_id=author_id , skip=skip, limit=limit)
 
 @app.get("/books/{book_id}", response_model=schemas.Book)
 def read_book(book_id: int, db: Session = Depends(get_session)):
