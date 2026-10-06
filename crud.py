@@ -4,8 +4,10 @@ from models import Author, Book
 from schemas import AuthorCreate, BookCreate
 
 
-def get_all_authors(db: Session):
-    return db.scalars(select(Author)).all()
+def get_all_authors(db: Session, skip: int = 0, limit: int = 10):
+    return db.scalars(
+        select(Author).offset(skip).limit(limit)
+    ).all()
 
 def get_author_name(db: Session, name: str = None):
     return db.scalar(select(Author).where(Author.name == name))
@@ -25,16 +27,21 @@ def create_author(db: Session, author: AuthorCreate):
 def get_all_books(
         db: Session,
         title: str = None,
-        author_name: str = None,
+        author_id: str = None,
+        skip: int = 0,
+        limit: int = 10
         ):
-    queryset = db.query(Book)
+    stmt = select(Book)
+
     if title is not None:
-        queryset = queryset.where(Book.title == title)
+        stmt = stmt.where(Book.title == title)
 
-    if author_name is not None:
-        queryset = queryset.join(Author).where(Author.name == author_name)
+    if author_id is not None:
+        stmt = stmt.join(Author).where(Author.id == author_id)
 
-    return db.scalars(queryset).all()
+    stmt = stmt.offset(skip).limit(limit)
+
+    return db.scalars(stmt).all()
 
 def get_book(db: Session, book_id: int):
     return db.scalar(select(Book).where(Book.id == book_id))

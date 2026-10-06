@@ -24,4 +24,4 @@ class Book(Base):
     publication_date: Mapped[date] = mapped_column()
     author_id: Mapped[int] = mapped_column(ForeignKey("authors.id"))
 
-    author: Mapped[Author] = relationship("Author", back_populates="books")
+    author: Mapped["Book"] = relationship("Author", back_populates="books")

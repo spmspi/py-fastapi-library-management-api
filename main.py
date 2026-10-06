@@ -5,10 +5,12 @@ from sqlmodel import Session
 from fastapi import Depends
 import crud
 import schemas
-from database import engine
-
+from database import engine, Base
 
 app = FastAPI()
+
+def create_db_and_tables():
+    Base.metadata.create_all(engine)
 
 def get_session():
     with Session(engine) as session:
@@ -23,8 +25,8 @@ def read_item(item_id: int, q: str | None = None):
     return {"item_id": item_id, "q": q}
 
 @app.get("/authors/", response_model=List[schemas.Author])
-def reed_author(db: Session = Depends(get_session)):
-    return crud.get_all_authors(db=db)
+def read_authors(db: Session = Depends(get_session), skip: int = 0, limit: int = 10):
+    return crud.get_all_authors(db=db, skip=skip, limit=limit)
 
 @app.get("/authors/{author_id}", response_model=schemas.Author)
 def author_retrieve(author_id: int, db: Session = Depends(get_session)):
